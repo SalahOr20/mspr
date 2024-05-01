@@ -61,6 +61,7 @@ class Advice(models.Model):
     title = models.CharField(max_length=45)
     description = models.CharField(max_length=45)
     like = models.IntegerField(null=True)
+    picture=models.ImageField(upload_to='uploads/', null=True)
     id_category = models.ForeignKey(Category, on_delete=models.CASCADE)
     id_user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
 
@@ -77,17 +78,13 @@ class Care(models.Model):
     ended_at = models.DateTimeField(blank=True, null=True)
     active = models.BooleanField()
     keeper = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='kept_cares')
+    botaniste = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='botaniste',null=True)
 
     class Meta:
         db_table = 'care'
 
 
-class Pictures(models.Model):
-    id_pictures = models.AutoField(primary_key=True)
-    url = models.CharField(max_length=60)
 
-    class Meta:
-        db_table = 'pictures'
 
 
 class Post(models.Model):
@@ -96,8 +93,19 @@ class Post(models.Model):
     description = models.CharField(max_length=100)
     visibility = models.BooleanField()
     id_care = models.ForeignKey(Care, on_delete=models.CASCADE)
-    id_pictures = models.ForeignKey(Pictures, on_delete=models.CASCADE, null=True)
     read = models.BooleanField()
 
     class Meta:
         db_table = 'post'
+class Pictures(models.Model):
+    id_pictures = models.AutoField(primary_key=True)
+    picture = models.ImageField(upload_to='uploads/', null=True,default='none')
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, null=True)
+
+    class Meta:
+        db_table = 'pictures'
+class Comment(models.Model):
+    id_comment= models.AutoField(primary_key=True)
+    comment=models.CharField(max_length=50)
+    createdAt=models.DateTimeField(blank=True, null=True)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, null=True)

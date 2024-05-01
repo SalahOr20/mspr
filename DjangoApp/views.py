@@ -1,6 +1,3 @@
-
-
-
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.hashers import make_password
 
@@ -11,10 +8,10 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from .models import CustomUser, Post, Pictures, Category, Care, Advice
+from .models import CustomUser, Post, Pictures, Category, Care, Advice, Comment
 
 from .serializers import CustomUserSerializer, PostSerializer, PicturesSerializer, CategorySerializer, CareSerializer, \
-    AdviceSerializer
+    AdviceSerializer, CommentSerializer
 
 
 ########## Vues des user #########
@@ -75,8 +72,88 @@ def login_view(request):
         return Response({'message': 'Invalid request method'}, status=status.HTTP_400_BAD_REQUEST)
 
 
+########## Vues des advices ########
+@api_view(['GET'])
+def ListAdvice(request):
+    try:
+        advices=Advice.objects.all()
+    except:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    if request.method=='GET':
+        serializer=AdviceSerializer(advices,many=True).data
+        return Response({'advices':serializer},status=status.HTTP_200_OK)
+    else:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+def CreateAdvice(request):
+    if request.method=='POST':
+        serializer=AdviceSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            advices=Advice.objects.all()
+            advices_data=AdviceSerializer(advices,many=True).data
+            return Response({
+                'advices_data':advices_data
+            }, status=status.HTTP_201_CREATED)
+
+@api_view(['PUT'])
+def UpdateAdvice(request, pk):
+    if request.method=='PUT':
+        try:
+            prev_advice=Advice.objects.get(pk=pk)
+        except:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        serializer=AdviceSerializer(prev_advice,data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            advices=Advice.objects.all()
+            advices_data=AdviceSerializer(advices,many=True).data
+            return Response({
+                'advices_data':advices_data
+            },status=status.HTTP_200_OK)
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['DELETE'])
+def DeleteAdvice(request, pk):
+    try:
+        advice=Advice.objects.get(pk=pk)
+    except:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    if request.method=='DELETE':
+        Advice.delete(advice)
+        advices = Advice.objects.all()
+        advices_data = AdviceSerializer(advices, many=True).data
+        return Response({
+            'advices_data': advices_data
+        }, status=status.HTTP_200_OK)
+
+########## Vues des category #########
+
+class CategoryListAPIView(generics.ListAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
 
 
+class CategoryDetailAPIView(generics.RetrieveAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+
+
+class CategoryCreateAPIView(generics.CreateAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+
+
+class CategoryUpdateAPIView(generics.UpdateAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+
+
+class CategoryDestroyAPIView(generics.DestroyAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
 
 ########## Vues des gardes #########
 
@@ -104,32 +181,84 @@ class CareDestroyAPIView(generics.DestroyAPIView):
     queryset = Care.objects.all()
     serializer_class = CareSerializer
 
+########## Vues de l'espace des botanistes #########
+@api_view(['GET'])
+def ListCareBotaniste(request,pk):
+    try:
+        cares=Care.objects.filter(botaniste=pk,active=1)
+    except:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    if request.method=='GET':
+        cares_data=CareSerializer(cares,many=True).data
+        return Response({'cares':cares_data},status=status.HTTP_200_OK)
 
-########## Vues des category #########
+@api_view(['GET'])
+def ListPostCare(request,pk):
+    try:
+        posts=Post.objects.filter(id_care=pk,visibility=1)
+    except:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    if request.method=='GET':
+        posts_data=PostSerializer(posts,many=True).data
+        return Response({'posts':posts_data},status=status.HTTP_200_OK)
 
-class CategoryListAPIView(generics.ListAPIView):
-    queryset = Category.objects.all()
-    serializer_class = CategorySerializer
+@api_view(['GET'])
+def DetailsPost(request, pk):
+    try:
+        post = Post.objects.get(pk=pk)
+    except Post.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
 
+    if request.method == 'GET':
+        post_data = PostSerializer(post).data
+        pictures = Pictures.objects.filter(post=post)
+        pictures_data = PicturesSerializer(pictures, many=True).data
+        comments = Comment.objects.filter(post_id=pk)
+        comments_data = CommentSerializer(comments, many=True).data
+        return Response({
+            'post': post_data,
+            'pictures': pictures_data,
+            'comments':comments_data
+        }, status=status.HTTP_200_OK)
+    else:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
-class CategoryDetailAPIView(generics.RetrieveAPIView):
-    queryset = Category.objects.all()
-    serializer_class = CategorySerializer
+@api_view(['GET'])
+def CommentsPost(request,pk):
+    try:
+        comments=Comment.objects.filter(post_id=pk)
+    except:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    if request.method=='GET':
+        comments_data=CommentSerializer(comments,many=True).data
+        return Response({'comments':comments_data},status=status.HTTP_200_OK)
 
+@api_view(['POST'])
+def CreateCommentPost(request,pk):
+    try:
+        post=Post.objects.get(pk=pk)
+    except:
+        return Response(status=status.HTTP_404_NOT_FOUND)
 
-class CategoryCreateAPIView(generics.CreateAPIView):
-    queryset = Category.objects.all()
-    serializer_class = CategorySerializer
+    if request.method=='POST':
+        comment=CommentSerializer(data=request.data)
+        if comment.is_valid():
+            comment.save(post=post)
+            return Response(status=status.HTTP_201_CREATED)
 
-
-class CategoryUpdateAPIView(generics.UpdateAPIView):
-    queryset = Category.objects.all()
-    serializer_class = CategorySerializer
-
-
-class CategoryDestroyAPIView(generics.DestroyAPIView):
-    queryset = Category.objects.all()
-    serializer_class = CategorySerializer
+@api_view(['DELETE'])
+def DeleteComment(request,pk):
+    try:
+        comment=Comment.objects.get(pk=pk)
+    except:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    if request.method=='DELETE':
+        Comment.delete(comment)
+        comments=Comment.objects.all()
+        comments_data=CommentSerializer(comments,many=True).data
+        return Response({'comments':comments_data},status=status.HTTP_200_OK)
+    else:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 ########## Vues des pictures #########
