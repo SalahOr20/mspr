@@ -24,11 +24,12 @@ from .views import register, login_view, CareListAPIView, \
     PicturesDetailAPIView, PicturesCreateAPIView, PicturesUpdateAPIView, PicturesDestroyAPIView, PostListAPIView, \
     PostDetailAPIView, PostCreateAPIView, PostUpdateAPIView, PostDestroyAPIView, CreateAdvice, UpdateAdvice, \
     DeleteAdvice, ListAdvice, ListCareBotaniste, ListPostCare, CreateCommentPost, CommentsPost, DeleteComment, \
-    DetailsPost
+    DetailsPost, UpdateProfile
 
 urlpatterns = [
     ########## URLs des users #########
     path('user/signup', register, name='register'),
+    path('user/update/<int:pk>', UpdateProfile, name='UpdateProfile'),
     path('user/signin', login_view, name='login'),
     path('token/', token_obtain_pair, name='token_obtain_pair'),
     ########## URLs des advices #########
