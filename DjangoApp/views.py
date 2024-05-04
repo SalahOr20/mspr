@@ -2,8 +2,10 @@ from django.contrib.auth import login, authenticate
 from django.contrib.auth.hashers import make_password
 
 from rest_framework import status, generics
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -51,6 +53,7 @@ class MyTokenObtainPairView(TokenObtainPairView):
 
 
 @api_view(['POST'])
+
 def login_view(request):
     if request.method == 'POST':
         email = request.data.get('email')
@@ -72,22 +75,24 @@ def login_view(request):
         return Response({'message': 'Invalid request method'}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['PUT'])
-def UpdateProfile(request, pk):
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def UpdateProfile(request):
+    user_id=request.user.id
     try:
-        user=CustomUser.objects.get(pk=pk)
+        user=CustomUser.objects.get(pk=user_id)
     except:
         return Response(status=status.HTTP_404_NOT_FOUND)
     if request.method=='PUT':
         serializer=CustomUserSerializer(user,data=request.data)
         if serializer.is_valid():
             serializer.save()
-
             return Response({'user':request.data},status=status.HTTP_200_OK)
-
-
 
 ########## Vues des advices ########
 @api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
 def ListAdvice(request):
     try:
         advices=Advice.objects.all()
@@ -100,6 +105,8 @@ def ListAdvice(request):
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
 def CreateAdvice(request):
     if request.method=='POST':
         serializer=AdviceSerializer(data=request.data)
@@ -112,6 +119,8 @@ def CreateAdvice(request):
             }, status=status.HTTP_201_CREATED)
 
 @api_view(['PUT'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
 def UpdateAdvice(request, pk):
     if request.method=='PUT':
         try:
@@ -142,6 +151,8 @@ def DeleteAdvice(request, pk):
         return Response({
             'advices_data': advices_data
         }, status=status.HTTP_200_OK)
+
+
 
 ########## Vues des category #########
 
@@ -197,9 +208,12 @@ class CareDestroyAPIView(generics.DestroyAPIView):
 
 ########## Vues de l'espace des botanistes #########
 @api_view(['GET'])
-def ListCareBotaniste(request,pk):
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def ListCareBotaniste(request):
+    user_id=request.user.id
     try:
-        cares=Care.objects.filter(botaniste=pk,active=1)
+        cares=Care.objects.filter(botaniste=user_id,active=1)
     except:
         return Response(status=status.HTTP_404_NOT_FOUND)
     if request.method=='GET':
@@ -207,6 +221,8 @@ def ListCareBotaniste(request,pk):
         return Response({'cares':cares_data},status=status.HTTP_200_OK)
 
 @api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
 def ListPostCare(request,pk):
     try:
         posts=Post.objects.filter(id_care=pk,visibility=1)
@@ -217,6 +233,8 @@ def ListPostCare(request,pk):
         return Response({'posts':posts_data},status=status.HTTP_200_OK)
 
 @api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
 def DetailsPost(request, pk):
     try:
         post = Post.objects.get(pk=pk)
@@ -238,6 +256,8 @@ def DetailsPost(request, pk):
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
 def CommentsPost(request,pk):
     try:
         comments=Comment.objects.filter(post_id=pk)
@@ -248,6 +268,8 @@ def CommentsPost(request,pk):
         return Response({'comments':comments_data},status=status.HTTP_200_OK)
 
 @api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
 def CreateCommentPost(request,pk):
     try:
         post=Post.objects.get(pk=pk)
@@ -261,6 +283,8 @@ def CreateCommentPost(request,pk):
             return Response(status=status.HTTP_201_CREATED)
 
 @api_view(['DELETE'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
 def DeleteComment(request,pk):
     try:
         comment=Comment.objects.get(pk=pk)
