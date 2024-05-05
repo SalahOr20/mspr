@@ -131,3 +131,6 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'DjangoApp.CustomUser'
+ACCESS_TOKEN_EXPIRE_SECONDS = 3600
+
+
