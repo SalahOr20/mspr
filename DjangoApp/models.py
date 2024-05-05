@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
 
 
+
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
         if not email:
@@ -35,7 +36,9 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     zip = models.IntegerField()
     city = models.CharField(max_length=45)
     phone = models.CharField(max_length=45)
-    role = models.CharField(max_length=45)
+    role = models.CharField(max_length=10, choices=[
+        ('owner', 'botanist'),
+    ], default='owner')
     last_connexion = models.DateTimeField(auto_now=True)
     is_staff = models.BooleanField(default=False)
 
@@ -52,8 +55,12 @@ class Category(models.Model):
     id_category = models.AutoField(primary_key=True)
     name = models.CharField(max_length=45)
 
+    def __str__(self):
+        return self.name
+
     class Meta:
         db_table = 'category'
+
 
 
 class Advice(models.Model):
@@ -64,6 +71,9 @@ class Advice(models.Model):
     picture=models.ImageField(upload_to='uploads/', null=True)
     id_category = models.ForeignKey(Category, on_delete=models.CASCADE)
     id_user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.title
 
     class Meta:
         db_table = 'advice'
@@ -80,6 +90,8 @@ class Care(models.Model):
     keeper = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='kept_cares')
     botaniste = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='botaniste',null=True)
 
+    def __str__(self):
+        return self.title
     class Meta:
         db_table = 'care'
 
@@ -95,6 +107,9 @@ class Post(models.Model):
     id_care = models.ForeignKey(Care, on_delete=models.CASCADE)
     read = models.BooleanField()
 
+    def __str__(self):
+        return self.title
+
     class Meta:
         db_table = 'post'
 class Pictures(models.Model):
@@ -109,3 +124,7 @@ class Comment(models.Model):
     comment=models.CharField(max_length=50)
     createdAt=models.DateTimeField(blank=True, null=True)
     post = models.ForeignKey(Post, on_delete=models.CASCADE, null=True)
+
+    def __str__(self):
+        return self.comment
+

@@ -1,3 +1,5 @@
+from datetime import timezone, timedelta, datetime
+
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.hashers import make_password
 
@@ -53,7 +55,6 @@ class MyTokenObtainPairView(TokenObtainPairView):
 
 
 @api_view(['POST'])
-
 def login_view(request):
     if request.method == 'POST':
         email = request.data.get('email')
@@ -63,17 +64,19 @@ def login_view(request):
             login(request, user)
             refresh = RefreshToken.for_user(user)
             access_token = str(refresh.access_token)
+            expiration_time = datetime.now() + timedelta(hours=1)
+            refresh.set_exp(expiration_time)
             user_info = {
                 'id': user.id,
                 'email': user.email,
                 'name': user.fullname,
+                'expiration_token':expiration_time
             }
-            return Response({'access_token': access_token,'user':user_info}, status=status.HTTP_200_OK)
+            return Response({'access_token': access_token, 'user': user_info}, status=status.HTTP_200_OK)
         else:
             return Response({'message': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
     else:
         return Response({'message': 'Invalid request method'}, status=status.HTTP_400_BAD_REQUEST)
-
 @api_view(['PUT'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
@@ -108,16 +111,18 @@ def ListAdvice(request):
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
 def CreateAdvice(request):
-    if request.method=='POST':
-        serializer=AdviceSerializer(data=request.data)
+    if request.method == 'POST':
+        id_user = request.user.id
+        mutable_data = request.data.copy()
+        mutable_data['id_user'] = id_user  # Ajouter l'ID de l'utilisateur aux données de la requête
+        serializer = AdviceSerializer(data=mutable_data)
         if serializer.is_valid():
             serializer.save()
-            advices=Advice.objects.all()
-            advices_data=AdviceSerializer(advices,many=True).data
-            return Response({
-                'advices_data':advices_data
-            }, status=status.HTTP_201_CREATED)
-
+            advices = Advice.objects.all()
+            advices_data = AdviceSerializer(advices, many=True).data
+            return Response({'advices_data': advices_data}, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 @api_view(['PUT'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
@@ -127,7 +132,10 @@ def UpdateAdvice(request, pk):
             prev_advice=Advice.objects.get(pk=pk)
         except:
             return Response(status=status.HTTP_404_NOT_FOUND)
-        serializer=AdviceSerializer(prev_advice,data=request.data)
+        id_user=request.user.id
+        mutable_data=request.data.copy()
+        mutable_data['id_user']=id_user
+        serializer=AdviceSerializer(prev_advice,data=mutable_data)
         if serializer.is_valid():
             serializer.save()
             advices=Advice.objects.all()
@@ -270,17 +278,18 @@ def CommentsPost(request,pk):
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
-def CreateCommentPost(request,pk):
+def CreateCommentPost(request, pk):
     try:
-        post=Post.objects.get(pk=pk)
-    except:
+        post = Post.objects.get(pk=pk)
+    except Post.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
-
-    if request.method=='POST':
-        comment=CommentSerializer(data=request.data)
-        if comment.is_valid():
-            comment.save(post=post)
+    if request.method == 'POST':
+        comment_serializer = CommentSerializer(data=request.data)
+        if comment_serializer.is_valid():
+            comment_serializer.save(post=post)
             return Response(status=status.HTTP_201_CREATED)
+        else:
+            return Response(comment_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['DELETE'])
 @authentication_classes([JWTAuthentication])
