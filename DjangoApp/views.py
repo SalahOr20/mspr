@@ -70,6 +70,11 @@ def login_view(request):
                 'id': user.id,
                 'email': user.email,
                 'name': user.fullname,
+                'address':user.address,
+                'zip':user.zip,
+                'phone':user.phone,
+                'city':user.city,
+                'role':user.role,
                 'expiration_token':expiration_time
             }
             return Response({'access_token': access_token, 'user': user_info}, status=status.HTTP_200_OK)
