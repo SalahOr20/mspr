@@ -77,6 +77,8 @@ def login_view(request):
             return Response({'message': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
     else:
         return Response({'message': 'Invalid request method'}, status=status.HTTP_400_BAD_REQUEST)
+
+
 @api_view(['PUT'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
@@ -112,6 +114,7 @@ def ListAdvice(request):
 @permission_classes([IsAuthenticated])
 def CreateAdvice(request):
     if request.method == 'POST':
+        print("Authorization Header:", request.headers.get('Authorization'))
         id_user = request.user.id
         mutable_data = request.data.copy()
         mutable_data['id_user'] = id_user  # Ajouter l'ID de l'utilisateur aux données de la requête
@@ -123,6 +126,8 @@ def CreateAdvice(request):
             return Response({'advices_data': advices_data}, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+
 @api_view(['PUT'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
