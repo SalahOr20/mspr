@@ -58,7 +58,7 @@ urlpatterns = [
     path('attribution/delete/care/post/<int:pk>/comment',DeleteComment,name='DeleteComment'),
     ########## URLs des pictures #########
     path('picture/', PicturesListAPIView.as_view(), name='picture-list'),
-    path('picture/<int:pk>', PicturesDetailAPIView.as_view(), name='picture-detail'),
+    path('picture<int:pk>', PicturesDetailAPIView.as_view(), name='picture-detail'),
     path('picture/create', PicturesCreateAPIView.as_view(), name='picture-create'),
     path('picture/<int:pk>/update', PicturesUpdateAPIView.as_view(), name='picture-update'),
     path('picture/<int:pk>/delete', PicturesDestroyAPIView.as_view(), name='picture-delete'),
