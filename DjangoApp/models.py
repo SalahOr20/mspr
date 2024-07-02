@@ -121,7 +121,7 @@ class Pictures(models.Model):
         db_table = 'pictures'
 class Comment(models.Model):
     id_comment= models.AutoField(primary_key=True)
-    comment=models.CharField(max_length=50)
+    comments=models.CharField(max_length=50)
     createdAt=models.DateTimeField(blank=True, null=True)
     post = models.ForeignKey(Post, on_delete=models.CASCADE, null=True)
 
