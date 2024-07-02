@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'rest_framework_simplejwt',
+
 ]
 
 MIDDLEWARE = [
@@ -51,6 +52,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'arosaje.urls'
@@ -90,6 +92,31 @@ DATABASES = {
 }
 
 
+
+CSRF_COOKIE_SECURE = True  # à utiliser avec HTTPS
+SESSION_COOKIE_SECURE = True  # à utiliser avec HTTPS
+CSRF_COOKIE_HTTPONLY = True
+SESSION_COOKIE_HTTPONLY = True
+
+# Si votre frontend est sur un domaine différent
+CORS_ALLOW_CREDENTIALS = True
+
+
+CORS_ORIGIN_WHITELIST = [
+    'http://localhost:3000',  # Ajoutez ici l'URL de votre frontend React
+]
+
+
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # Adresse de votre application React
+    "http://127.0.0.1:3000",
+]
+CORS_ALLOW_ALL_ORIGINS = True
+
+
+
+
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
@@ -126,11 +153,14 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'DjangoApp.CustomUser'
 ACCESS_TOKEN_EXPIRE_SECONDS = 3600
+
 
 
