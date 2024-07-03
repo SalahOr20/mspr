@@ -37,13 +37,14 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     city = models.CharField(max_length=45)
     phone = models.CharField(max_length=45)
     role = models.CharField(max_length=10, choices=[
-        ('owner', 'botanist'),
+        ('owner', 'Owner'),
+        ('botanist', 'Botanist'),
     ], default='owner')
     last_connexion = models.DateTimeField(auto_now=True)
     is_staff = models.BooleanField(default=False)
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['fullname','role']
+    REQUIRED_FIELDS = ['fullname', 'role']
 
     objects = CustomUserManager()
 
