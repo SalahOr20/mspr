@@ -22,6 +22,7 @@ from .serializers import CustomUserSerializer, PostSerializer, PicturesSerialize
 @api_view(['POST'])
 def register(request):
     if request.method == 'POST':
+        print(request)
         password = request.data.get('password')
         hashed_password = make_password(password)
         request.data['password'] = hashed_password
