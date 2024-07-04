@@ -24,7 +24,7 @@ from .views import register, login_view, CareListAPIView, \
     PicturesDetailAPIView, PicturesCreateAPIView, PicturesUpdateAPIView, PicturesDestroyAPIView, PostListAPIView, \
     PostDetailAPIView, PostCreateAPIView, PostUpdateAPIView, PostDestroyAPIView, CreateAdvice, UpdateAdvice, \
     DeleteAdvice, ListAdvice, ListCareBotaniste, ListPostCare, CreateCommentPost, CommentsPost, DeleteComment, \
-    DetailsPost, UpdateProfile
+    DetailsPost, UpdateProfile, ListCareOwner, ListCareKeeper, ListCareToKeep, UpdateCare
 
 urlpatterns = [
     ########## URLs des users #########
@@ -45,7 +45,7 @@ urlpatterns = [
     path('category/<int:pk>/delete', CategoryDestroyAPIView.as_view(), name='category-delete'),
     ########## URLs des gardes #########
     path('care', CareListAPIView.as_view(), name='care-list'),
-    path('care/<int:pk>', CareDetailAPIView.as_view(), name='care-detail'),
+    #path('care/<int:pk>', CareDetailAPIView.as_view(), name='care-detail'),
     path('care/create', CareCreateAPIView.as_view(), name='care-create'),
     path('care/<int:pk>/update', CareUpdateAPIView.as_view(), name='care-update'),
     path('care/<int:pk>/delete', CareDestroyAPIView.as_view(), name='care-delete'),
@@ -69,5 +69,13 @@ urlpatterns = [
     path('post/create', PostCreateAPIView.as_view(), name='post-create'),
     path('post/<int:pk>/update', PostUpdateAPIView.as_view(), name='post-update'),
     path('post/<int:pk>/delete', PostDestroyAPIView.as_view(), name='post-delete'),
+    ######### URLS espace propriaitaire####
+    path('owned-cares/', ListCareOwner, name='ListCareOwner'),
+    path('kept-cares/', ListCareKeeper, name='ListCareOwner'),
+    path('cares-to-keep/', ListCareToKeep, name='ListCareToKeep'),
+    path('keep/', UpdateCare, name='UpdateCare'),
+
+
+
 ]
 
