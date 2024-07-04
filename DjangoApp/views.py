@@ -2,6 +2,8 @@ from datetime import timezone, timedelta, datetime
 
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.hashers import make_password
+import random
+
 
 from rest_framework import status, generics
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
@@ -200,6 +202,53 @@ class CategoryDestroyAPIView(generics.DestroyAPIView):
     serializer_class = CategorySerializer
 
 ########## Vues des gardes #########
+
+##### Amelioration du selectionnement aléatoires a faire #####
+
+
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def care_create_with_assignment(request):
+    if request.method == 'POST':
+        print(request.data)
+        serializer = CareSerializer(data=request.data, partial=True)
+
+        if serializer.is_valid():
+            print('coucou')
+            # Récupérer l'owner depuis l'utilisateur authentifié
+            owner = request.user
+
+            # Sélectionner aléatoirement un botaniste et un keeper
+            botanistes = CustomUser.objects.filter(role='botanist').exclude(id=owner.id)
+            keepers = CustomUser.objects.filter(role='owner').exclude(id=owner.id)
+            print('on est la')
+            if not botanistes.exists() or not keepers.exists():
+                return Response({"error": "Pas assez d'utilisateurs pour attribuer les rôles"}, status=status.HTTP_400_BAD_REQUEST)
+
+            botaniste = random.choice(botanistes)
+            keeper = random.choice(keepers)
+            print(botaniste)
+            print('hello world!')
+
+            # Créer l'objet Care avec les utilisateurs attribués
+            care = Care.objects.create(
+                owner=owner,
+                title=serializer.validated_data['title'],
+                description=serializer.validated_data['description'],
+                started_at=serializer.validated_data.get('started_at'),
+                ended_at=serializer.validated_data.get('ended_at'),
+                active=serializer.validated_data['active'],
+                keeper=keeper,
+                botaniste=botaniste
+            )
+
+            # Sérialiser l'objet créé pour la réponse
+            response_serializer = CareSerializer(care)
+            return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
 
 class CareListAPIView(generics.ListAPIView):
     queryset = Care.objects.all()
