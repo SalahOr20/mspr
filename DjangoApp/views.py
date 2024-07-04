@@ -1,3 +1,4 @@
+import random
 from datetime import timezone, timedelta, datetime
 
 from django.contrib.auth import login, authenticate
@@ -7,6 +8,7 @@ from rest_framework import status, generics
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -365,4 +367,82 @@ class PostUpdateAPIView(generics.UpdateAPIView):
 class PostDestroyAPIView(generics.DestroyAPIView):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
+
+#######################
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def ListCareOwner(request):
+    user_id=request.user.id
+    try:
+        cares=Care.objects.filter(owner=user_id,active=1)
+    except:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    if request.method=='GET':
+        cares_data=CareSerializer(cares,many=True).data
+        return Response({'cares':cares_data},status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def ListCareKeeper(request):
+    user_id=request.user.id
+    try:
+        cares=Care.objects.filter(keeper=user_id,active=1)
+    except:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    if request.method=='GET':
+        cares_data=CareSerializer(cares,many=True).data
+        return Response({'cares':cares_data},status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def ListCareToKeep(request):
+    user_id = request.user.id
+    try:
+        # Utilisation de exclude pour exclure les gardes de l'utilisateur connecté
+        cares = Care.objects.exclude(owner=user_id).filter(active=0)
+    except Care.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        cares_data = CareSerializer(cares, many=True).data
+        return Response({'cares': cares_data}, status=status.HTTP_200_OK)
+
+
+@api_view(['PUT'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def UpdateCare(request, pk):
+    user_id = request.user.id
+    try:
+        care = Care.objects.get(pk=pk)
+    except Care.DoesNotExist:
+        return Response({'detail': 'Care not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    # Vérifie si l'utilisateur est le propriétaire de la garde
+    if care.owner_id != user_id:
+        return Response({'detail': 'You do not have permission to update this care'}, status=status.HTTP_403_FORBIDDEN)
+
+    # Vérifie si la garde n'est pas déjà active
+    if care.active:
+        return Response({'detail': 'Care is already active'}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Sélectionne un botaniste aléatoire parmi ceux disponibles
+    available_botanists = CustomUser.objects.filter(role='botanist').exclude(id=user_id)
+    if not available_botanists.exists():
+        return Response({'detail': 'No botanists available to assign'}, status=status.HTTP_400_BAD_REQUEST)
+
+    random_botanist = random.choice(available_botanists)
+
+    # Met à jour la garde
+    care.active = True
+    care.keeper_id = user_id
+    care.botanist_id = random_botanist.id
+    care.save()
+
+    serializer = CareSerializer(care)
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
