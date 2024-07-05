@@ -440,7 +440,7 @@ def UpdateCare(request, pk):
     # Met à jour la garde
     care.active = True
     care.keeper_id = user_id
-    care.botanist_id = random_botanist.id
+    care.botaniste_id = random_botanist.id
     care.save()
 
     serializer = CareSerializer(care)
