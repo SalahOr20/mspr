@@ -24,7 +24,7 @@ from .views import register, login_view, CareListAPIView, \
     PicturesDetailAPIView, PicturesCreateAPIView, PicturesUpdateAPIView, PicturesDestroyAPIView, PostListAPIView, \
     PostDetailAPIView, PostCreateAPIView, PostUpdateAPIView, PostDestroyAPIView, CreateAdvice, UpdateAdvice, \
     DeleteAdvice, ListAdvice, ListCareBotaniste, ListPostCare, CreateCommentPost, CommentsPost, DeleteComment, \
-    DetailsPost, UpdateProfile, ListCareOwner, ListCareKeeper, ListCareToKeep, UpdateCare
+    DetailsPost, UpdateProfile, ListCareOwner, ListCareKeeper, ListCareToKeep, UpdateCare, create_care, create_post
 
 urlpatterns = [
     ########## URLs des users #########
@@ -46,7 +46,6 @@ urlpatterns = [
     ########## URLs des gardes #########
     path('care', CareListAPIView.as_view(), name='care-list'),
     #path('care/<int:pk>', CareDetailAPIView.as_view(), name='care-detail'),
-    path('care/create', CareCreateAPIView.as_view(), name='care-create'),
     path('care/<int:pk>/update', CareUpdateAPIView.as_view(), name='care-update'),
     path('care/<int:pk>/delete', CareDestroyAPIView.as_view(), name='care-delete'),
     ########## URLs de l'espace botaniste ########
@@ -74,8 +73,8 @@ urlpatterns = [
     path('kept-cares/', ListCareKeeper, name='ListCareOwner'),
     path('cares-to-keep/', ListCareToKeep, name='ListCareToKeep'),
     path('keep/', UpdateCare, name='UpdateCare'),
-
-
+    path('care/create', create_care, name='create_care'),
+    path('cares/<int:care_id>/posts/', create_post, name='create_post'),
 
 ]
 
