@@ -95,7 +95,7 @@ class Care(models.Model):
         return self.title
     class Meta:
         db_table = 'care'
-
+30
 
 
 

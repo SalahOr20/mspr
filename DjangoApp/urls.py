@@ -43,11 +43,6 @@ urlpatterns = [
     path('category/create', CategoryCreateAPIView.as_view(), name='category-create'),
     path('category/<int:pk>/update', CategoryUpdateAPIView.as_view(), name='category-update'),
     path('category/<int:pk>/delete', CategoryDestroyAPIView.as_view(), name='category-delete'),
-    ########## URLs des gardes #########
-    path('care', CareListAPIView.as_view(), name='care-list'),
-    #path('care/<int:pk>', CareDetailAPIView.as_view(), name='care-detail'),
-    path('care/<int:pk>/update', CareUpdateAPIView.as_view(), name='care-update'),
-    path('care/<int:pk>/delete', CareDestroyAPIView.as_view(), name='care-delete'),
 
     ########## URLs de l'espace botaniste ########
     path('attribution', ListCareBotaniste, name='ListCareBotaniste'),
@@ -77,9 +72,8 @@ urlpatterns = [
     path('owned-cares/', ListCareOwner, name='ListCareOwner'),
     path('kept-cares/', ListCareKeeper, name='ListCareOwner'),
     path('cares-to-keep/', ListCareToKeep, name='ListCareToKeep'),
-    path('keep/', UpdateCare, name='UpdateCare'),
+    path('keep/<int:pk>', UpdateCare, name='UpdateCare'),
     path('care/create', create_care, name='create_care'),
     path('cares/<int:care_id>/posts/', create_post, name='create_post'),
-
 ]
 
