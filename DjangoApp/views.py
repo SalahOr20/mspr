@@ -501,3 +501,42 @@ def UpdateCare(request, pk):
     serializer = CareSerializer(care)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
+
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def create_care(request):
+    user = request.user
+
+    # Vérifie si l'utilisateur est propriétaire
+    if user.role != 'owner':
+        return Response({'detail': 'You do not have permission to create a care'}, status=status.HTTP_403_FORBIDDEN)
+
+    # Création de la garde
+    serializer = CareSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save(owner=user)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def create_post(request, care_id):
+    user = request.user
+
+    # Vérifie si l'utilisateur est le keeper de la garde
+    try:
+        care = Care.objects.get(id=care_id)
+        if care.keeper != user:
+            return Response({'detail': 'You do not have permission to create a post for this care'}, status=status.HTTP_403_FORBIDDEN)
+    except Care.DoesNotExist:
+        return Response({'detail': 'Care not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    # Création du post
+    serializer = PostSerializer(data=request.data, context={'request': request})
+    if serializer.is_valid():
+        serializer.save(id_care=care)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
