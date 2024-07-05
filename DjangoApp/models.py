@@ -88,7 +88,7 @@ class Care(models.Model):
     started_at = models.DateTimeField(blank=True, null=True)
     ended_at = models.DateTimeField(blank=True, null=True)
     active = models.BooleanField()
-    keeper = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='kept_cares')
+    keeper = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='kept_cares', null=True)
     botaniste = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='botaniste',null=True)
 
     def __str__(self):

@@ -49,10 +49,6 @@ urlpatterns = [
     path('care/create', CareCreateAPIView.as_view(), name='care-create'),
     path('care/<int:pk>/update', CareUpdateAPIView.as_view(), name='care-update'),
     path('care/<int:pk>/delete', CareDestroyAPIView.as_view(), name='care-delete'),
-    ############## Test killian care ####################
-
-    path('care/create-with-assignment', care_create_with_assignment, name='care-create-with-assignment'),
-
 
     ########## URLs de l'espace botaniste ########
     path('attribution', ListCareBotaniste, name='ListCareBotaniste'),
