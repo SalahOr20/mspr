@@ -478,7 +478,7 @@ def UpdateCare(request, pk):
         return Response({'detail': 'Care not found'}, status=status.HTTP_404_NOT_FOUND)
 
     # Vérifie si l'utilisateur est le propriétaire de la garde
-    if care.owner_id != user_id:
+    if care.owner_id == user_id:
         return Response({'detail': 'You do not have permission to update this care'}, status=status.HTTP_403_FORBIDDEN)
 
     # Vérifie si la garde n'est pas déjà active
@@ -495,8 +495,9 @@ def UpdateCare(request, pk):
     # Met à jour la garde
     care.active = True
     care.keeper_id = user_id
-    care.botanist_id = random_botanist.id
-    care.save()
+    botanist_id = random_botanist.id
+    print(care.botanist_id)
+    care.save(botanist=botanist_id)
 
     serializer = CareSerializer(care)
     return Response(serializer.data, status=status.HTTP_200_OK)
