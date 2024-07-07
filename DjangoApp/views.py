@@ -1,10 +1,9 @@
 import random
 from datetime import timezone, timedelta, datetime
 
-from django.contrib.auth import login, authenticate
+from django.contrib.auth import login, authenticate 
 from django.contrib.auth.hashers import make_password
 import random
-
 
 from rest_framework import status, generics
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
@@ -87,6 +86,8 @@ def login_view(request):
             return Response({'message': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
     else:
         return Response({'message': 'Invalid request method'}, status=status.HTTP_400_BAD_REQUEST)
+    
+
 
 
 @api_view(['PUT'])
@@ -495,9 +496,8 @@ def UpdateCare(request, pk):
     # Met à jour la garde
     care.active = True
     care.keeper_id = user_id
-    botanist_id = random_botanist.id
-    print(care.botanist_id)
-    care.save(botanist=botanist_id)
+    care.botaniste_id = random_botanist.id
+    care.save()
 
     serializer = CareSerializer(care)
     return Response(serializer.data, status=status.HTTP_200_OK)

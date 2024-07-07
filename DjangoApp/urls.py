@@ -16,7 +16,7 @@ Including another URLconf
 """
 
 from django.urls import path
-from rest_framework_simplejwt.views import token_obtain_pair
+from rest_framework_simplejwt.views import token_obtain_pair , TokenRefreshView
 
 from .views import register, login_view, CareListAPIView, \
     CareDetailAPIView, CareCreateAPIView, CareUpdateAPIView, CareDestroyAPIView, CategoryListAPIView, \
@@ -32,6 +32,9 @@ urlpatterns = [
     path('user/update', UpdateProfile, name='UpdateProfile'),
     path('user/signin', login_view, name='login'),
     path('token/', token_obtain_pair, name='token_obtain_pair'),
+    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+
+
     ########## URLs des advices #########
     path('advice', ListAdvice, name='ListAdvice'),
     path('advice/create', CreateAdvice, name='CreateAdvice'),
